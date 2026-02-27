@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply text-slate-800 bg-slate-50 antialiased;
+  }
+}
+
+@media print {
+  @page {
+    size: A3 portrait;
+    margin: 10mm;
+    /* A3印刷時の余白確保 */
+  }
+
+  body {
+    background-color: white !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 印刷時に不要なUI要素を隠すためのユーティリティクラス */
+  .no-print {
+    display: none !important;
+  }
+
+  /* 印刷時はズームをリセットしてブラウザの自動縮小を防ぐ */
+  .print-zoom-reset {
+    zoom: 1 !important;
+    transform: none !important;
+    width: 277mm !important;
+    /* A3縦(297mm) - 余白(20mm) = 固定幅にして縮小を回避 */
+    max-width: 277mm !important;
+    min-width: 277mm !important;
+  }
+}
