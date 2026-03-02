@@ -1,15 +1,56 @@
-import { db, storage } from './firebase';
+import { db } from './firebase';
 import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const EVENTS_COLLECTION = 'events';
 
-// 画像アップロード
+/**
+ * 画像を読み込み、Canvasを使用してリサイズ・圧縮し、Base64形式のDataURLを返す
+ */
+function compressImage(file, maxWidth = 400, quality = 0.7) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                // 最大幅に合わせてリサイズ
+                if (width > maxWidth) {
+                    height = (maxWidth / width) * height;
+                    width = maxWidth;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // JPEG形式で圧縮してBase64で出力
+                const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                resolve(dataUrl);
+            };
+            img.onerror = (err) => reject(err);
+        };
+        reader.onerror = (err) => reject(err);
+    });
+}
+
+// 画像処理（Firestore保存用のBase64変換）
 export async function uploadImage(file) {
     if (!file) return null;
-    const storageRef = ref(storage, `event-images/${Date.now()}_${file.name}`);
-    const snapshot = await uploadBytes(storageRef, file);
-    return await getDownloadURL(snapshot.ref);
+    try {
+        console.log("Compressing image:", file.name);
+        const base64 = await compressImage(file);
+        console.log("Compression complete. Size:", (base64.length / 1024).toFixed(2), "KB");
+        return base64;
+    } catch (error) {
+        console.error("Image Compression Error:", error);
+        throw new Error('画像の圧縮に失敗しました。');
+    }
 }
 
 // スケジュール一覧の購読
