@@ -125,17 +125,17 @@ function App() {
       <div className="flex flex-col h-full bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print:border-none print:shadow-none print:rounded-none relative">
 
         {/* プロジェクトタブ */}
-        <div className="flex items-center bg-slate-100 border-b border-slate-200 no-print overflow-x-auto">
+        <div className="flex items-center bg-slate-100 border-b border-slate-200 no-print overflow-x-auto shrink-0">
           {projects.map(p => (
             <div
               key={p.id}
-              className={`group flex items-center transition-colors border-r border-slate-200 h-12 ${projectId === p.id ? 'bg-white' : 'hover:bg-slate-200'}`}
+              className={`group flex items-center transition-colors border-r border-slate-200 h-10 md:h-12 shrink-0 ${projectId === p.id ? 'bg-white' : 'hover:bg-slate-200'}`}
             >
               {editingProjectId === p.id ? (
                 <div className="flex items-center px-4 gap-1">
                   <input
                     autoFocus
-                    className="text-sm font-bold border rounded px-1 w-32 focus:outline-blue-500"
+                    className="text-xs md:text-sm font-bold border rounded px-1 w-24 md:w-32 focus:outline-blue-500"
                     value={editingName}
                     onChange={(e) => setEditingName(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleUpdateProject()}
@@ -147,11 +147,11 @@ function App() {
                 <>
                   <button
                     onClick={() => setProjectId(p.id)}
-                    className={`px-6 h-full font-bold text-sm flex items-center ${projectId === p.id ? 'text-blue-600 border-b-2 border-b-blue-600' : 'text-slate-500'}`}
+                    className={`px-4 md:px-6 h-full font-bold text-xs md:text-sm flex items-center whitespace-nowrap ${projectId === p.id ? 'text-blue-600 border-b-2 border-b-blue-600' : 'text-slate-500'}`}
                   >
                     {p.name}
                   </button>
-                  <div className="flex items-center gap-1 pr-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1 pr-2 md:opacity-0 group-hover:opacity-100 transition-opacity">
                     <button onClick={() => startEditing(p)} className="p-1 text-slate-400 hover:text-blue-600"><Edit2 size={12} /></button>
                     <button onClick={() => handleDeleteProject(p.id, p.name)} className="p-1 text-slate-400 hover:text-red-500"><Trash2 size={12} /></button>
                   </div>
@@ -178,27 +178,29 @@ function App() {
           projectName={projects.find(p => p.id === projectId)?.name || ''}
         />
 
-        <div className="flex-grow flex flex-col overflow-auto bg-slate-50 print:bg-white print:overflow-visible">
+        <div className="flex-grow flex flex-col overflow-y-auto bg-slate-50 print:bg-white print:overflow-visible">
           <div
             style={{ zoom: `${zoomLevel}%`, transformOrigin: 'top left' }}
-            className="flex-grow flex flex-col min-w-max w-full p-4 print:p-0 print-zoom-reset"
+            className="flex-grow flex flex-col w-full p-2 md:p-4 print:p-0 print-zoom-reset"
           >
             {projectId ? (
-              <>
-                {Array.from({ length: monthCount }).map((_, i) => {
-                  const currentMonthDate = new Date(baseDate.getFullYear(), baseDate.getMonth() + i, 1);
-                  return (
-                    <CalendarGrid
-                      key={`month-${i}`}
-                      monthDate={currentMonthDate}
-                      events={events}
-                      onDayClick={handleDayClick}
-                      onEventClick={handleEventClick}
-                    />
-                  );
-                })}
-                <NotesSection projectId={projectId} />
-              </>
+              <div className="overflow-x-auto pb-4 md:pb-0">
+                <div className="min-w-[500px] md:min-w-full">
+                  {Array.from({ length: monthCount }).map((_, i) => {
+                    const currentMonthDate = new Date(baseDate.getFullYear(), baseDate.getMonth() + i, 1);
+                    return (
+                      <CalendarGrid
+                        key={`month-${i}`}
+                        monthDate={currentMonthDate}
+                        events={events}
+                        onDayClick={handleDayClick}
+                        onEventClick={handleEventClick}
+                      />
+                    );
+                  })}
+                  <NotesSection projectId={projectId} />
+                </div>
+              </div>
             ) : (
               <div className="flex-grow flex items-center justify-center text-slate-400 text-lg">
                 現場を選択するか、新しい現場を追加してください

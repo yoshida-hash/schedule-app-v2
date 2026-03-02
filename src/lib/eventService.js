@@ -1,7 +1,16 @@
-import { db } from './firebase';
+import { db, storage } from './firebase';
 import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const EVENTS_COLLECTION = 'events';
+
+// 画像アップロード
+export async function uploadImage(file) {
+    if (!file) return null;
+    const storageRef = ref(storage, `event-images/${Date.now()}_${file.name}`);
+    const snapshot = await uploadBytes(storageRef, file);
+    return await getDownloadURL(snapshot.ref);
+}
 
 // スケジュール一覧の購読
 export function subscribeToEvents(projectId, callback) {
