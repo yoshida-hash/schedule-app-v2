@@ -117,7 +117,13 @@ export default function CalendarGrid({ monthDate, events = [], onDayClick, onEve
                             </div>
 
                             {/* イベント表示領域 */}
-                            <div className="flex-1 relative print:overflow-visible" style={{ minHeight: `${Math.max(eventsAreaHeight, 20)}px` }}>
+                            {/* maxRowに基づいて高さを動的に計算 (モバイル: 16px, PC: 22px) */}
+                            <div
+                                className="flex-1 relative print:overflow-visible"
+                                style={{
+                                    minHeight: `${Math.max((maxRow + 1) * (typeof window !== 'undefined' && window.innerWidth < 768 ? 16 : 22), 20)}px`
+                                }}
+                            >
                                 {dayEvents.map(event => {
                                     const start = event.startDate || event.date;
                                     const end = event.endDate || event.date;
@@ -141,7 +147,7 @@ export default function CalendarGrid({ monthDate, events = [], onDayClick, onEve
                                                 ${!isMultiDay ? 'rounded-sm md:rounded-md mx-0.5' : ''}
                                             `}
                                             style={{
-                                                top: `${(event.row || 0) * (window.innerWidth < 768 ? 16 : 22)}px`,
+                                                top: `${(event.row || 0) * (typeof window !== 'undefined' && window.innerWidth < 768 ? 16 : 22)}px`,
                                                 ...(!isStartNode && isMultiDay ? { marginLeft: '-2px', paddingLeft: '3px' } : {}),
                                                 ...(!isEndNode && isMultiDay ? { marginRight: '-2px', paddingRight: '3px' } : {})
                                             }}
@@ -162,21 +168,28 @@ export default function CalendarGrid({ monthDate, events = [], onDayClick, onEve
                                     );
                                 })}
 
-                                {/* 画像の表示 (日付の開始日に表示) */}
-                                <div className="flex flex-wrap gap-0.5 mt-auto pt-4 md:pt-6 pb-0.5">
-                                    {imageEvents.map((event, idx) => (
-                                        <div
-                                            key={`${event.id}-img-${idx}`}
-                                            className="w-6 h-6 md:w-12 md:h-12 rounded-sm md:rounded-md overflow-hidden border border-white md:border-2 shadow-sm md:shadow-md transform rotate-[-2deg] hover:rotate-0 transition-transform cursor-pointer"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onEventClick(event);
-                                            }}
-                                        >
-                                            <img src={event.imageUrl} alt="" className="w-full h-full object-cover" />
-                                        </div>
-                                    ))}
-                                </div>
+                                {/* 画像の表示 (予定の数に合わせて上部にマージンを確保) */}
+                                {imageEvents.length > 0 && (
+                                    <div
+                                        className="flex flex-wrap gap-1 pb-1"
+                                        style={{
+                                            marginTop: `${(maxRow + 1) * (typeof window !== 'undefined' && window.innerWidth < 768 ? 16 : 22) + 4}px`
+                                        }}
+                                    >
+                                        {imageEvents.map((event, idx) => (
+                                            <div
+                                                key={`${event.id}-img-${idx}`}
+                                                className="w-10 h-10 md:w-16 md:h-16 rounded-sm md:rounded-md overflow-hidden border border-white md:border-2 shadow-sm md:shadow-md transform rotate-[-2deg] hover:rotate-0 transition-transform cursor-pointer relative z-20"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onEventClick(event);
+                                                }}
+                                            >
+                                                <img src={event.imageUrl} alt="" className="w-full h-full object-cover" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     );
